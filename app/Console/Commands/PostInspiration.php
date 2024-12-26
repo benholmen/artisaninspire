@@ -6,6 +6,7 @@ use \Exception;
 use App\Models\Post;
 use App\Support\LilWayne;
 
+use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\info;
 use Illuminate\Console\Command;
 use Illuminate\Foundation\Inspiring;
@@ -33,6 +34,10 @@ class PostInspiration extends Command
             return;
         }
 
+        if (! confirm('Do you want to post this?')) {
+            return Command::FAILURE;
+        }
+
         Post::create(['post' => $inspiration])
             ->postToBluesky();
 
@@ -54,7 +59,8 @@ class PostInspiration extends Command
 
     private function randomQuote(): string
     {
-        $quotes = Inspiring::quotes()
+        $quotes = collect()
+            ->merge(Inspiring::quotes())
             ->merge(LilWayne::lyrics())
             ->merge([
                 "Try to be a rainbow in someone's cloud. - Maya Angelou",
